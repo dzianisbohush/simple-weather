@@ -1,6 +1,6 @@
 import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
-import HomeContainer from './Home/containers/Home';
+import HomeContainer from './Home/containers';
 
 const AppRoutes = () => (
   <Switch>

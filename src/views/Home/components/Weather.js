@@ -1,41 +1,42 @@
 import React, { PureComponent } from "react";
 import PropTypes from "prop-types";
-import { Select, Radio } from "antd";
 import debounce from "lodash/debounce";
+import { Radio, Select, Spin } from "antd";
 import {
   WEATHER_SOURCE_APIXU_NAME,
   WEATHER_SOURCE_STORMGLASS_NAME
 } from "../../../data/constants";
 
+import "../assets/styles/weather.css";
+
 const Option = Select.Option;
 const RadioGroup = Radio.Group;
 
-class Home extends PureComponent {
+class Weather extends PureComponent {
   constructor(props) {
     super(props);
     this.getLocationsWithDebounce = debounce(this.props.getLocations, 800);
   }
 
-  componentDidMount() {
-    const { getCurrentPosition } = this.props;
-
-    getCurrentPosition();
-  }
+  state = {
+    selectedLocationId: ""
+  };
 
   handleSelect = value => {
-    const {
-      locations,
-      getWeather,
-      selectedWeatherSource,
-      setSelectedLocationName
-    } = this.props;
+    const { selectedLocationId } = this.state;
+    const { locations, getWeather, setSelectedLocationName } = this.props;
     const selectedLocation = locations.find(
       location => location.id.toString() === value
     );
     const { lat, lon, name } = selectedLocation;
 
-    getWeather(selectedWeatherSource, lat, lon);
+    if (selectedLocationId === value) {
+      return;
+    }
+
+    getWeather(lat, lon);
     setSelectedLocationName(name);
+    this.setState({ selectedLocationId: value });
   };
 
   handleChangeWeatherSource = e => {
@@ -49,14 +50,16 @@ class Home extends PureComponent {
       selectedLocationName,
       locations,
       selectedWeatherSource,
-      airTemperature
+      airTemperature,
+      isLoadingAirTemperature,
+      isLoadingLocations
     } = this.props;
 
     return (
-      <div>
+      <div className="weather-wrapper">
         <h1>{selectedLocationName}</h1>
-        <div>
-          <span>Weather source: </span>
+        <div className="weather-source-wrapper">
+          <p>Weather source: </p>
           <RadioGroup
             onChange={this.handleChangeWeatherSource}
             value={selectedWeatherSource}
@@ -65,43 +68,46 @@ class Home extends PureComponent {
             <Radio value={WEATHER_SOURCE_STORMGLASS_NAME}>Stormglass API</Radio>
           </RadioGroup>
         </div>
-        <div>
-          <span>Select another location:</span>
+        <div className="select-location-wrapper">
+          <p>Select another location:</p>
           <Select
             showSearch
             placeholder="Input city"
             filterOption={false}
             onSearch={this.getLocationsWithDebounce}
+            notFoundContent={isLoadingLocations ? <Spin size="small" /> : null}
             onSelect={this.handleSelect}
-            style={{ width: "100%" }}
+            style={{ width: "90%" }}
           >
-            {locations &&
-            Object.keys(locations).length > 0 &&
-            locations.map(location => (
-              <Option key={location.id}>{location.name}</Option>
-            ))}
+            {locations && (Object.keys(locations).length > 0) &&
+              locations.map(location => (<Option key={location.id}>{location.name}</Option>)
+            )}
           </Select>
         </div>
-        {airTemperature && <p>Air temperature: {airTemperature} °C</p>}
+        {isLoadingAirTemperature || !airTemperature ? (
+            <Spin tip="loding air temperature..." />
+          ) : (
+            <div className="temperature-wrapper">
+              <p>Air temperature:</p>
+              <p>{airTemperature} °C</p>
+            </div>
+        )}
       </div>
     );
   }
 }
 
-Home.defaultProps = {
-  airTemperature: ""
-};
-
-Home.propsTypes = {
-  getCurrentPosition: PropTypes.func.isRequired,
-  getLocations: PropTypes.func.isRequired,
+Weather.propTypes = {
   getWeather: PropTypes.func.isRequired,
   setSelectedLocationName: PropTypes.func.isRequired,
   selectedLocationName: PropTypes.string.isRequired,
   setWeatherSource: PropTypes.func.isRequired,
   selectedWeatherSource: PropTypes.string.isRequired,
   locations: PropTypes.array.isRequired,
-  airTemperature: PropTypes.string
+  isLoadingAirTemperature: PropTypes.bool.isRequired,
+  isLoadingLocations: PropTypes.bool.isRequired,
+  airTemperature: PropTypes.string.isRequired,
+  getLocations: PropTypes.func.isRequired
 };
 
-export default Home;
+export default Weather;
