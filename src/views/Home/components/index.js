@@ -1,13 +1,12 @@
-import React, { PureComponent } from "react";
-import PropTypes from "prop-types";
-import Weather from "./Weather";
+import React, { PureComponent } from 'react';
+import PropTypes from 'prop-types';
+import Weather from './Weather';
 
-import '../assets/styles/home.css'
+import '../assets/styles/home.css';
 
 class Home extends PureComponent {
   componentDidMount() {
     const { getCurrentPosition } = this.props;
-
     getCurrentPosition();
   }
 
@@ -26,7 +25,7 @@ class Home extends PureComponent {
     } = this.props;
 
     return (
-      <div className='home-wrapper'>
+      <div className="home-wrapper">
         <Weather
           locations={locations}
           getWeather={getWeather}
@@ -45,10 +44,10 @@ class Home extends PureComponent {
 }
 
 Home.defaultProps = {
-  airTemperature: ""
+  airTemperature: ''
 };
 
-Home.propsTypes = {
+Home.propTypes = {
   getCurrentPosition: PropTypes.func.isRequired,
   getLocations: PropTypes.func.isRequired,
   getWeather: PropTypes.func.isRequired,

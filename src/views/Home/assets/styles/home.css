@@ -1,7 +1,7 @@
 .home-wrapper {
-    height: 100vh;
-    position: relative;
-    font-family: serif;
-    background: rgb(2,0,36);
-    background: linear-gradient(302deg, rgba(2,0,36,1) 7%, rgba(44,194,57,0.4529747596153846) 34%, rgba(0,255,77,0.7478465544871795) 100%);
+  height: 100vh;
+  position: relative;
+  font-family: serif;
+  background: rgb(2, 0, 36);
+  background: linear-gradient(302deg, rgba(2, 0, 36, 1) 7%, rgba(44, 194, 57, 0.4529747596153846) 34%, rgba(0, 255, 77, 0.7478465544871795) 100%);
 }
