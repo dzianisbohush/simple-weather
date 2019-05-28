@@ -99,7 +99,6 @@ class WeatherComponent extends PureComponent {
             onChange={this.handleInputChange}
             required
           />
-
           <input type="submit" value="Send Request" />
         </form>
         {currentAirTemperature.length > 0 && <p>{currentAirTemperature} °C</p>}
