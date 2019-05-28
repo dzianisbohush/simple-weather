@@ -66,31 +66,24 @@ class WeatherComponent extends PureComponent {
     return (
       <div className="weather-wrapper">
         <h1>{selectedLocation.toUpperCase()}</h1>
-
         <form onSubmit={this.handleFormSubmit}>
           <p>Weather source: </p>
-          <fieldset id="source">
-            <label htmlFor={WEATHER_SOURCE_APIXU_NAME}>Apixu API</label>
-            <input
-              type="radio"
-              value={WEATHER_SOURCE_APIXU_NAME}
-              name="source"
-              id={WEATHER_SOURCE_APIXU_NAME}
-              checked={weatherSource === WEATHER_SOURCE_APIXU_NAME}
-              onChange={this.handleChangeWeatherSource}
-            />
-            <label htmlFor={WEATHER_SOURCE_STORMGLASS_NAME}>
-              Stormglass API
-            </label>
-            <input
-              type="radio"
-              value={WEATHER_SOURCE_STORMGLASS_NAME}
-              name="source"
-              id={WEATHER_SOURCE_STORMGLASS_NAME}
-              checked={weatherSource === WEATHER_SOURCE_STORMGLASS_NAME}
-              onChange={this.handleChangeWeatherSource}
-            />
-          </fieldset>
+          <label htmlFor={WEATHER_SOURCE_APIXU_NAME}>Apixu API</label>
+          <input
+            type="radio"
+            id={WEATHER_SOURCE_APIXU_NAME}
+            value={WEATHER_SOURCE_APIXU_NAME}
+            onChange={this.handleChangeWeatherSource}
+            checked={weatherSource === WEATHER_SOURCE_APIXU_NAME}
+          />
+          <label htmlFor={WEATHER_SOURCE_STORMGLASS_NAME}>Stormglass API</label>
+          <input
+            type="radio"
+            id={WEATHER_SOURCE_STORMGLASS_NAME}
+            value={WEATHER_SOURCE_STORMGLASS_NAME}
+            onChange={this.handleChangeWeatherSource}
+            checked={weatherSource === WEATHER_SOURCE_STORMGLASS_NAME}
+          />
           <input
             id="location"
             name="location"
@@ -99,7 +92,7 @@ class WeatherComponent extends PureComponent {
             onChange={this.handleInputChange}
             required
           />
-          <input type="submit" value="Send Request" />
+          <input type="submit" value="Get Weather" />
         </form>
         {currentAirTemperature.length > 0 && <p>{currentAirTemperature} °C</p>}
       </div>
