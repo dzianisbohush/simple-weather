@@ -5,6 +5,7 @@ import {
   WEATHER_SOURCE_APIXU_NAME,
   WEATHER_SOURCE_STORMGLASS_NAME
 } from 'data/constants';
+import noWeatherIcon from 'weather/assets/img/no-weather-icon.png';
 
 const MainWrapper = styled.div`
   position: relative;
@@ -82,6 +83,7 @@ const WeatherSourceWithLocationWrapper = styled.div`
 
   fieldset {
     border: none;
+    text-align: left;
 
     label {
       display: block;
@@ -89,12 +91,19 @@ const WeatherSourceWithLocationWrapper = styled.div`
   }
 `;
 
-const AirTemperature = styled.p`
+const AirTemperatureWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   width: 30%;
-  margin: 0;
-  font-size: 3em;
-  font-weight: bold;
-  white-space: nowrap;
+
+  p {
+    margin: 0;
+    font-size: 3em;
+    font-weight: bold;
+    white-space: nowrap;
+  }
 `;
 
 const WeatherInfoWrapper = styled.div`
@@ -113,6 +122,7 @@ const WeatherInfoWrapper = styled.div`
 class WeatherComponent extends PureComponent {
   state = {
     currentAirTemperature: '',
+    weatherIconAddress: '',
     selectedLocation: '',
     cityNameInputValue: '',
     weatherSource: WEATHER_SOURCE_APIXU_NAME
@@ -129,11 +139,16 @@ class WeatherComponent extends PureComponent {
     const currentWeather = await getWeather(cityName, weatherSource);
 
     if (currentWeather) {
-      const { airTemperature, formattedLocationName } = currentWeather;
+      const {
+        airTemperature,
+        formattedLocationName,
+        weatherIconAddress
+      } = currentWeather;
 
       this.setState({
         selectedLocation: formattedLocationName,
-        currentAirTemperature: airTemperature
+        currentAirTemperature: airTemperature,
+        weatherIconAddress
       });
 
       return;
@@ -165,7 +180,8 @@ class WeatherComponent extends PureComponent {
       cityNameInputValue,
       weatherSource,
       selectedLocation,
-      currentAirTemperature
+      currentAirTemperature,
+      weatherIconAddress
     } = this.state;
 
     return (
@@ -201,8 +217,19 @@ class WeatherComponent extends PureComponent {
                   </fieldset>
                 </label>
               </WeatherSourceWithLocationWrapper>
+
               {currentAirTemperature.length > 0 && (
-                <AirTemperature>{currentAirTemperature} °C</AirTemperature>
+                <AirTemperatureWrapper>
+                  <img
+                    src={
+                      weatherIconAddress.length > 0
+                        ? `http:${weatherIconAddress}`
+                        : noWeatherIcon
+                    }
+                    alt="weather icon"
+                  />
+                  <p>{currentAirTemperature} °C</p>
+                </AirTemperatureWrapper>
               )}
             </WeatherInfoWrapper>
             <LocationInputWithSubmitBtnWrapper>

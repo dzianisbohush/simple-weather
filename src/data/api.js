@@ -70,6 +70,7 @@ export const getWeather = async (cityName, weatherSource) => {
       if (!data.error) {
         return {
           airTemperature: Math.round(data.current.temp_c).toString(),
+          weatherIconAddress: data.current.condition.icon,
           formattedLocationName
         };
       }
@@ -96,7 +97,8 @@ export const getWeather = async (cityName, weatherSource) => {
           airTemperature: Math.round(
             data.hours[0].airTemperature[0].value
           ).toString(),
-          formattedLocationName
+          formattedLocationName,
+          weatherIconAddress: ''
         };
       }
     }
