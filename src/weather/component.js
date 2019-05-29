@@ -1,10 +1,10 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { getCurrentPosition, getWeather } from '../data/api';
+import { getCurrentPosition, getWeather } from 'data/api';
 import {
   WEATHER_SOURCE_APIXU_NAME,
   WEATHER_SOURCE_STORMGLASS_NAME
-} from '../data/constants';
+} from 'data/constants';
 
 const MainWrapper = styled.div`
   position: relative;
