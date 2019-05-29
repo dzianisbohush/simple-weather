@@ -11,6 +11,10 @@ import {
 
 export const getCoordinatesFromLocationName = async locationName => {
   try {
+    if(!OPENCAGEDATA_API_KEY) {
+      throw Error('API key is not found');
+    }
+
     const response = await fetch(
       `${OPENCAGEDATA_BASE_URL}/json?key=${OPENCAGEDATA_API_KEY}&q=${locationName}&pretty=1`
     );
@@ -46,9 +50,18 @@ export const getCurrentPosition = async () => {
 export const getWeather = async (cityName, weatherSource) => {
   try {
     const coordinates = await getCoordinatesFromLocationName(cityName);
+
+    if(!coordinates) {
+      return;
+    }
+
     const { formattedLocationName, lat, lng } = coordinates;
 
     if (weatherSource === WEATHER_SOURCE_APIXU_NAME) {
+      if(!WEATHER_APIXU_API_KEY) {
+        throw Error('API key is not found');
+      }
+
       const response = await fetch(
         `${WEATHER_APIXU_BASE_URL}/current.json?key=${WEATHER_APIXU_API_KEY}&q=${lat},${lng}`
       );
@@ -63,6 +76,10 @@ export const getWeather = async (cityName, weatherSource) => {
     }
 
     if (weatherSource === WEATHER_SOURCE_STORMGLASS_NAME) {
+      if(!WEATHER_STORMGLASS_API_KEY) {
+        throw Error('API key is not found');
+      }
+
       const params = 'airTemperature';
       const response = await fetch(
         `${WEATHER_STORMGLASS_BASE_URL}/weather/point?lat=${lat}&lng=${lng}&params=${params}`,

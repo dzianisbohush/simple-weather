@@ -23,6 +23,7 @@
     "es6": true,
     "serviceworker": true
   },
+  "parser": "babel-eslint",
   "globals": {
     "window": true
   }

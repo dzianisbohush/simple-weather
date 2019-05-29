@@ -9,6 +9,15 @@ import {
 const MainWrapper = styled.div`
   position: relative;
   height: 100vh;
+  background: linear-gradient(
+    to bottom,
+    #b4ddb4 0%,
+    #83c783 17%,
+    #52b152 33%,
+    #008a00 67%,
+    #005700 83%,
+    #002400 100%
+  );
 `;
 
 const WeatherWrapper = styled.div`
@@ -21,6 +30,21 @@ const WeatherWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   text-align: center;
+  width: 40%;
+  background: white;
+  box-shadow: 10px 10px 5px 0px rgba(0, 0, 0, 0.75);
+
+  @media (max-width: 1024px) {
+    width: 60%;
+  }
+
+  @media (max-width: 768px) {
+    width: 90%;
+  }
+
+  form {
+    width: 100%;
+  }
 `;
 
 const LocationInput = styled.input`
@@ -31,21 +55,59 @@ const LocationInput = styled.input`
 `;
 
 const SubmitInput = styled.input`
-  border-radius: 5px;
+  background: white;
+  padding: 1em;
+  margin-bottom: 1em;
 `;
 
-const AirTemperatureTitle = styled.p`
-  font-size: 1em;
-  margin-bottom: 0;
+const LocationInputWithSubmitBtnWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
 `;
 
-const AirTemperatureValue = styled.p`
-  font-size: 1.5em;
+const WeatherSourceWithLocationWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 70%;
+  padding-left: 10px;
+
+  @media (max-width: 425px) {
+    align-items: center;
+    padding-left: 0;
+  }
+
+  fieldset {
+    border: none;
+
+    label {
+      display: block;
+    }
+  }
+`;
+
+const AirTemperature = styled.p`
+  width: 30%;
   margin: 0;
+  font-size: 3em;
+  font-weight: bold;
+  white-space: nowrap;
 `;
 
-const WeatherSourceFieldset = styled.fieldset`
-  border: none;
+const WeatherInfoWrapper = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #326fab;
+  color: white;
+
+  @media (max-width: 425px) {
+    flex-direction: column;
+    justify-content: space-between;
+  }
 `;
 
 class WeatherComponent extends PureComponent {
@@ -109,51 +171,52 @@ class WeatherComponent extends PureComponent {
     return (
       <MainWrapper>
         <WeatherWrapper>
-          <h1>{selectedLocation.toUpperCase()}</h1>
           <form onSubmit={this.handleFormSubmit}>
-            <label htmlFor="weather_source">Weather source:</label>
-            <WeatherSourceFieldset id="weather_source">
-              <div>
-                <input
-                  type="radio"
-                  id={WEATHER_SOURCE_APIXU_NAME}
-                  value={WEATHER_SOURCE_APIXU_NAME}
-                  onChange={this.handleChangeWeatherSource}
-                  checked={weatherSource === WEATHER_SOURCE_APIXU_NAME}
-                />
-                <label htmlFor={WEATHER_SOURCE_APIXU_NAME}>Apixu API</label>
-              </div>
-              <div>
-                <input
-                  type="radio"
-                  id={WEATHER_SOURCE_STORMGLASS_NAME}
-                  value={WEATHER_SOURCE_STORMGLASS_NAME}
-                  onChange={this.handleChangeWeatherSource}
-                  checked={weatherSource === WEATHER_SOURCE_STORMGLASS_NAME}
-                />
-                <label htmlFor={WEATHER_SOURCE_STORMGLASS_NAME}>
-                  Stormglass API
+            <WeatherInfoWrapper>
+              <WeatherSourceWithLocationWrapper>
+                <h1>{selectedLocation.toUpperCase()}</h1>
+                <label htmlFor="weather_source">
+                  <fieldset id="weather_source">
+                    Weather source:
+                    <label htmlFor={WEATHER_SOURCE_APIXU_NAME}>
+                      <input
+                        type="radio"
+                        id={WEATHER_SOURCE_APIXU_NAME}
+                        value={WEATHER_SOURCE_APIXU_NAME}
+                        onChange={this.handleChangeWeatherSource}
+                        checked={weatherSource === WEATHER_SOURCE_APIXU_NAME}
+                      />
+                      Apixu API
+                    </label>
+                    <label htmlFor={WEATHER_SOURCE_STORMGLASS_NAME}>
+                      <input
+                        type="radio"
+                        id={WEATHER_SOURCE_STORMGLASS_NAME}
+                        value={WEATHER_SOURCE_STORMGLASS_NAME}
+                        onChange={this.handleChangeWeatherSource}
+                        checked={weatherSource === WEATHER_SOURCE_STORMGLASS_NAME}
+                      />
+                      Stormglass API
+                    </label>
+                  </fieldset>
                 </label>
-              </div>
-            </WeatherSourceFieldset>
-            <LocationInput
-              id="location"
-              name="location"
-              placeholder="Input city name"
-              value={cityNameInputValue}
-              onChange={this.handleInputChange}
-              required
-            />
-            <SubmitInput type="submit" value="Get Weather" />
+              </WeatherSourceWithLocationWrapper>
+              {currentAirTemperature.length > 0 && (
+                <AirTemperature>{currentAirTemperature} °C</AirTemperature>
+              )}
+            </WeatherInfoWrapper>
+            <LocationInputWithSubmitBtnWrapper>
+              <LocationInput
+                id="location"
+                name="location"
+                placeholder="Input city name"
+                value={cityNameInputValue}
+                onChange={this.handleInputChange}
+                required
+              />
+              <SubmitInput type="submit" value="Get Weather" />
+            </LocationInputWithSubmitBtnWrapper>
           </form>
-          {currentAirTemperature.length > 0 && (
-            <React.Fragment>
-              <AirTemperatureTitle>Air temperature:</AirTemperatureTitle>
-              <AirTemperatureValue>
-                {currentAirTemperature} °C
-              </AirTemperatureValue>
-            </React.Fragment>
-          )}
         </WeatherWrapper>
       </MainWrapper>
     );
