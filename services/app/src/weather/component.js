@@ -210,14 +210,15 @@ class WeatherComponent extends PureComponent {
                         id={WEATHER_SOURCE_STORMGLASS_NAME}
                         value={WEATHER_SOURCE_STORMGLASS_NAME}
                         onChange={this.handleChangeWeatherSource}
-                        checked={weatherSource === WEATHER_SOURCE_STORMGLASS_NAME}
+                        checked={
+                          weatherSource === WEATHER_SOURCE_STORMGLASS_NAME
+                        }
                       />
                       Stormglass API
                     </label>
                   </fieldset>
                 </label>
               </WeatherSourceWithLocationWrapper>
-
               {currentAirTemperature.length > 0 && (
                 <AirTemperatureWrapper>
                   <img

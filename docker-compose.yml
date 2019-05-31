@@ -1,0 +1,18 @@
+version: '3.3'
+
+services:
+  app:
+    env_file: './services/app/.env'
+    build:
+      context: services/app
+      dockerfile: Dockerfile.development
+    expose:
+      - '3000'
+
+  nginx:
+    build:
+      context: services/nginx
+    ports:
+      - '80:80'
+    depends_on:
+      - app

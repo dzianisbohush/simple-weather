@@ -1,0 +1,10 @@
+# base image
+FROM node:12.2.0-alpine
+
+WORKDIR /app
+ENV NODE_ENV=development
+
+COPY . /app
+RUN npm install
+
+CMD ["npm", "start"]
