@@ -1,0 +1,11 @@
+weather_app_network: weather_app_network
+ansible_user: root
+ansible_ssh_pass: "{{ vault_ansible_ssh_pass }}"
+catalor_user_home: root
+app_catalog: weather_app
+env_file_path: "{{ app_catalog }}/.env"
+
+REACT_APP_WEATHER_APIXU_API_KEY: "{{ REACT_APP_WEATHER_APIXU_API_KEY }}"
+REACT_APP_WEATHER_STORMGLASS_API_KEY: "{{ REACT_APP_WEATHER_STORMGLASS_API_KEY }}"
+REACT_APP_WEATHER_SOPENCAGEDATA_API_KEY: "{{ REACT_APP_WEATHER_SOPENCAGEDATA_API_KEY }}"
+NODE_PATH: src

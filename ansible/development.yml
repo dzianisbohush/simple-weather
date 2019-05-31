@@ -3,6 +3,6 @@
   gather_facts: no
   tasks:
     - template:
-        src: enviroment.j2
+        src: environment.j2
         dest: ../.env
       tags: env
