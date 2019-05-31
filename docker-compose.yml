@@ -3,6 +3,7 @@ version: '3.3'
 services:
   app:
     env_file: './services/app/.env'
+    container_name: simpleweather
     build:
       context: services/app
       dockerfile: Dockerfile.development
@@ -10,6 +11,7 @@ services:
       - '3000'
 
   nginx:
+    container_name: simpleweather_nginx
     build:
       context: services/nginx
     ports:
