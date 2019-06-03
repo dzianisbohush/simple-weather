@@ -2,3 +2,8 @@ app_port: 3000
 app_image_name: "dmbogush/simple-weather"
 nginx_image_name: "dmbogush/simple-weather-nginx"
 do_token: "{{ vault_do_token }}"
+
+REACT_APP_WEATHER_APIXU_API_KEY: "{{ REACT_APP_WEATHER_APIXU_API_KEY }}"
+REACT_APP_WEATHER_STORMGLASS_API_KEY: "{{ REACT_APP_WEATHER_STORMGLASS_API_KEY }}"
+REACT_APP_WEATHER_SOPENCAGEDATA_API_KEY: "{{ REACT_APP_WEATHER_SOPENCAGEDATA_API_KEY }}"
+NODE_PATH: src
