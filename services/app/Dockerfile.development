@@ -7,5 +7,7 @@ ENV NODE_ENV=development
 COPY . /app
 RUN npm install
 
-CMD ["npm", "run", "build"]
+RUN npm run build
+COPY . /app
+
 CMD ["npm", "run", "server"]
