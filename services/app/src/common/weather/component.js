@@ -1,11 +1,11 @@
 import React, { PureComponent } from 'react';
 import styled from 'styled-components';
-import { getCurrentPosition, getWeather } from 'data/api';
+import { getCurrentPosition, getWeather } from 'common/data/api';
 import {
   WEATHER_SOURCE_APIXU_NAME,
   WEATHER_SOURCE_STORMGLASS_NAME
-} from 'data/constants';
-import noWeatherIcon from 'weather/assets/img/no-weather-icon.png';
+} from 'common/data/constants';
+import noWeatherIcon from 'common/weather/assets/img/no-weather-icon.png';
 
 const MainWrapper = styled.div`
   position: relative;
