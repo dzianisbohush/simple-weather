@@ -7,4 +7,5 @@ ENV NODE_ENV=development
 COPY . /app
 RUN npm install
 
-CMD ["npm", "start"]
+CMD ["npm", "run", "build"]
+CMD ["npm", "run", "server"]
