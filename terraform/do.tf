@@ -8,14 +8,14 @@ provider "digitalocean" {
 
 # Create a web server
 resource "digitalocean_droplet" "web" {
-  name = "weather-api"
+  name = "simple-weather-app"
   image  = "ubuntu-18-04-x64"
   region = "fra1"
   size = "s-1vcpu-1gb"
 }
 
 resource "digitalocean_project" "weather-project" {
-  name        = "weather-wps"
+  name        = "simple-weather-app"
   description = "Project for the weather"
   purpose     = "Class project / Educational purposes"
   environment = "Staging"

@@ -6,7 +6,7 @@ services:
     container_name: simpleweather
     build:
       context: services/app
-      dockerfile: Dockerfile.development
+      dockerfile: Dockerfile
     expose:
       - '3000'
 

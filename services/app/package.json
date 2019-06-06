@@ -25,7 +25,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "server": "NODE_ENV=development NODE_PATH=src node src/server/bootstrap.js"
+    "server": "node src/server/bootstrap.js"
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"
