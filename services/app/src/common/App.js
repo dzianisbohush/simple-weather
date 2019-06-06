@@ -1,6 +1,6 @@
 import React from 'react';
 import { createGlobalStyle } from 'styled-components'
-import WeatherComponent from 'common/weather/component';
+import AppRoutes from 'common/AppRoutes';
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -12,7 +12,7 @@ function App() {
   return (
       <div className="App">
         <GlobalStyle />
-        <WeatherComponent />
+        <AppRoutes />
       </div>
   );
 }
