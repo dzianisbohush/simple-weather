@@ -10,4 +10,7 @@ ENV NODE_PATH=src
 COPY . /app
 RUN npm install
 
-CMD ["npm", "start"]
+RUN npm run build
+COPY . /app
+
+CMD ["npm", "run", "server"]
