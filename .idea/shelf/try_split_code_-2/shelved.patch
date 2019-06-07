@@ -1,0 +1,265 @@
+Index: services/app/src/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\nimport ReactDOM from 'react-dom';\nimport App from 'common/App';\nimport { BrowserRouter } from 'react-router-dom';\n\n// import * as serviceWorker from 'serviceWorker';\n\nReactDOM.hydrate(\n  <BrowserRouter>\n    <App />\n  </BrowserRouter>,\n  document.getElementById('root')\n);\n\n// serviceWorker.register();\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/index.js	(date 1559826166000)
++++ services/app/src/index.js	(date 1559906579000)
+@@ -1,15 +1,20 @@
+ import React from 'react';
+ import ReactDOM from 'react-dom';
+ import App from 'common/App';
++import Loadable from 'react-loadable';
+ import { BrowserRouter } from 'react-router-dom';
+ 
+ // import * as serviceWorker from 'serviceWorker';
+ 
+-ReactDOM.hydrate(
+-  <BrowserRouter>
+-    <App />
+-  </BrowserRouter>,
+-  document.getElementById('root')
+-);
++window.onload = () => {
++  Loadable.preloadReady().then(() => {
++    ReactDOM.hydrate(
++      <BrowserRouter>
++        <App />
++      </BrowserRouter>,
++      document.getElementById('root')
++    );
++  });
++};
+ 
+ // serviceWorker.register();
+Index: services/app/src/server/middleware/renderer.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\nimport { renderToString } from 'react-dom/server';\nimport { ServerStyleSheet } from 'styled-components';\nimport { StaticRouter } from 'react-router-dom';\n\n// import our main App component\nimport App from '../../common/App';\n\nconst path = require('path');\nconst fs = require('fs');\n\nexport default (req, res, next) => {\n  // point to the html file created by CRA's build tool\n  const filePath = path.resolve(\n    __dirname,\n    '..',\n    '..',\n    '..',\n    'build',\n    'index.html'\n  );\n\n  // render the app as a string\n  const context = {};\n  const sheet = new ServerStyleSheet();\n  const html = renderToString(\n    sheet.collectStyles(\n      <StaticRouter location={req.url} context={context}>\n        <App />\n      </StaticRouter>\n    )\n  );\n  const styles = sheet.getStyleTags();\n\n  fs.readFile(filePath, 'utf8', (err, htmlData) => {\n    if (err) {\n      console.error('Something went wrong:', err);\n      return res.status(500).send('Oops, better luck next time!');\n    }\n    if (context.status === 404) {\n      res.status(404);\n    }\n    if (context.url) {\n      return res.redirect(301, context.url);\n    }\n\n    return res.send(\n      htmlData\n        .replace('<div id=\"root\"></div>', `<div id=\"root\">${html}</div>`)\n        .replace('</title>', `</title>${styles}`)\n    );\n  });\n};\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/server/middleware/renderer.js	(date 1559826166000)
++++ services/app/src/server/middleware/renderer.js	(date 1559909981000)
+@@ -1,15 +1,25 @@
+ import React from 'react';
+ import { renderToString } from 'react-dom/server';
++import Loadable from 'react-loadable';
+ import { ServerStyleSheet } from 'styled-components';
+ import { StaticRouter } from 'react-router-dom';
+ 
+ // import our main App component
+ import App from '../../common/App';
+ 
++// import the manifest generated with the create-react-app build
++import manifest from '../../../build/asset-manifest.json';
++
++// function to extract js assets from the manifest
++const extractAssets = (assets, chunks) =>
++  Object.keys(assets)
++    .filter(asset => chunks.indexOf(asset.replace('.js', '')) > -1)
++    .map(k => assets[k]);
++
+ const path = require('path');
+ const fs = require('fs');
+ 
+-export default (req, res, next) => {
++export default (req, res) => {
+   // point to the html file created by CRA's build tool
+   const filePath = path.resolve(
+     __dirname,
+@@ -20,34 +30,74 @@
+     'index.html'
+   );
+ 
+-  // render the app as a string
+-  const context = {};
+-  const sheet = new ServerStyleSheet();
+-  const html = renderToString(
+-    sheet.collectStyles(
+-      <StaticRouter location={req.url} context={context}>
+-        <App />
+-      </StaticRouter>
+-    )
+-  );
+-  const styles = sheet.getStyleTags();
++  fs.readFile(filePath, 'utf8', (err, htmlData) => {
++    if (err) {
++      console.error('Something went wrong:', err);
++      return res.status(500).send('Oops, better luck next time!');
++    }
++
++    const modules = [];
++    const context = {};
++
++    // if (context.status === 404) {
++    //   res.status(404);
++    // }
++    // if (context.url) {
++    //   return res.redirect(301, context.url);
++    // }
++
++    // render the app as a string
++    const sheet = new ServerStyleSheet();
++    const html = renderToString(
++      sheet.collectStyles(
++        <Loadable.Capture report={m => modules.push(m)}>
++          <StaticRouter location={req.url} context={context}>
++            <App />
++          </StaticRouter>
++        </Loadable.Capture>
++      )
++    );
++    const styles = sheet.getStyleTags();
+ 
+-  fs.readFile(filePath, 'utf8', (err, htmlData) => {
+-    if (err) {
+-      console.error('Something went wrong:', err);
+-      return res.status(500).send('Oops, better luck next time!');
+-    }
+-    if (context.status === 404) {
+-      res.status(404);
+-    }
+-    if (context.url) {
+-      return res.redirect(301, context.url);
+-    }
++    const mainScript = manifest['main.js'];
++    const runtimeScript = manifest['runtime~main.js'];
++    const userScripts = extractAssets(manifest, modules)
++      .map(c => `<script type="text/javascript" src="${c}"></script>`);
++
++
++    // return res.send(
++    //   htmlData
++    //     // write the React app
++    //     .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
++    //     // append the extra js assets
++    //     .replace('</body>', `${extraChunks.join('')}</body>`)
++    //     .replace('</title>', `</title>${styles}`)
++    // );
+ 
+     return res.send(
+-      htmlData
+-        .replace('<div id="root"></div>', `<div id="root">${html}</div>`)
+-        .replace('</title>', `</title>${styles}`)
++      `
++      <!doctype html>
++<html lang="en">
++
++<head>
++    <meta charset="utf-8" />
++    <link rel="shortcut icon" href="/favicon.ico" />
++    <meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no" />
++    <meta name="theme-color" content="#000000" />
++    <link rel="manifest" href="/manifest.json" />
++    <title>React App</title>
++    ${styles}
++</head>
++<body>
++    <noscript>You need to enable JavaScript to run this app.</noscript>
++    <div id="root">${html}</div>
++    <script type="text/javascript" src="${runtimeScript}"></script>
++    <script type="text/javascript" src="/static/js/4.4444c6c1.chunk.js"></script>
++    ${userScripts.join(' ')}
++    <script type="text/javascript" src="${mainScript}"></script>
++</body>
++</html>
++      `
+     );
+   });
+ };
+Index: services/app/src/common/AppRoutes.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\nimport { Switch, Route } from 'react-router-dom';\nimport WeatherComponent from 'common/weather/component';\nimport NotFound from 'common/notFound/component';\n\nconst AppRoutes = () => (\n  <Switch>\n    <Route exact path=\"/\" component={WeatherComponent} />\n    <Route component={NotFound} />\n  </Switch>\n);\n\nexport default AppRoutes;\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/common/AppRoutes.js	(date 1559826166000)
++++ services/app/src/common/AppRoutes.js	(date 1559908019000)
+@@ -1,12 +1,25 @@
+ import React from 'react';
+ import { Switch, Route } from 'react-router-dom';
+-import WeatherComponent from 'common/weather/component';
+-import NotFound from 'common/notFound/component';
++// import WeatherComponent from 'common/weather/component';
++// import NotFound from 'common/notFound/component';
++import Loadable from 'react-loadable';
++
++const LoadableWeather = Loadable({
++  loader: () => import(/* webpackChunkName: "WeatherChunk" */ 'common/weather/component'), // this will tell webpack to generate named bundles
++  loading: () => <div>loading...</div>,
++  modules: ['WeatherChunk'], // <-- this is what we'll use to map components to js bundles
++});
++
++const LoadableNotFound = Loadable({
++  loader: () => import(/* webpackChunkName: "NotFoundChunk" */ 'common/notFound/component'), // this will tell webpack to generate named bundles
++  loading: () => <div>loading...</div>,
++  modules: ['NotFoundChunk'], // <-- this is what we'll use to map components to js bundles
++});
+ 
+ const AppRoutes = () => (
+   <Switch>
+-    <Route exact path="/" component={WeatherComponent} />
+-    <Route component={NotFound} />
++    <Route exact path="/" component={LoadableWeather} />
++    <Route component={LoadableNotFound} />
+   </Switch>
+ );
+ 
+Index: services/app/src/server/bootstrap.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\nrequire('ignore-styles');\nrequire('url-loader');\nrequire('file-loader');\nrequire('@babel/register')({\n  ignore: [ /(node_modules)/ ],\n  presets: [\n    [\n      \"@babel/preset-env\",\n      {\n        \"targets\": {\n          \"node\": \"10\"\n        }\n      }\n    ],\n    '@babel/preset-react'\n  ],\n  plugins: [\n    'syntax-dynamic-import',\n    'dynamic-import-node',\n    '@babel/plugin-proposal-class-properties',\n    \"babel-plugin-styled-components\"\n  ]\n});\nrequire('./index');
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/server/bootstrap.js	(date 1559826166000)
++++ services/app/src/server/bootstrap.js	(date 1559905672000)
+@@ -19,7 +19,8 @@
+     'syntax-dynamic-import',
+     'dynamic-import-node',
+     '@babel/plugin-proposal-class-properties',
+-    "babel-plugin-styled-components"
++    "babel-plugin-styled-components",
++    'react-loadable/babel'
+   ]
+ });
+-require('./index');
+\ No newline at end of file
++require('./index');
+Index: services/app/src/server/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import express from 'express';\n\n// we'll talk about this in a minute:\nimport serverRenderer from './middleware/renderer';\n\nconst PORT = 3000;\nconst path = require('path');\n\n// initialize the application and create the routes\nconst app = express();\nconst router = express.Router();\n\n// root (/) should always serve our server rendered page\nrouter.use('^/$', serverRenderer);\n\n// other static resources should just be served as they are\nrouter.use(\n  express.static(path.resolve(__dirname, '..', '..', 'build'), {\n    maxAge: '30d'\n  })\n);\n\n// tell the app to use the above rules\napp.use(router);\n\n// start the app\napp.listen(PORT, error => {\n  if (error) {\n    return console.log('something bad happened', error);\n  }\n\n  console.log('listening on ' + PORT + '...');\n});\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/server/index.js	(date 1559826166000)
++++ services/app/src/server/index.js	(date 1559908127000)
+@@ -1,4 +1,5 @@
+ import express from 'express';
++import Loadable from 'react-loadable';
+ 
+ // we'll talk about this in a minute:
+ import serverRenderer from './middleware/renderer';
+@@ -24,10 +25,12 @@
+ app.use(router);
+ 
+ // start the app
+-app.listen(PORT, error => {
+-  if (error) {
+-    return console.log('something bad happened', error);
+-  }
++Loadable.preloadAll().then(() => {
++  app.listen(PORT, (error) => {
++    if (error) {
++      return console.log('something bad happened', error);
++    }
+ 
+-  console.log('listening on ' + PORT + '...');
++    console.log("listening on " + PORT + "...");
++  });
+ });

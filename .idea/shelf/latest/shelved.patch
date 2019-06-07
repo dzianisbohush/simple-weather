@@ -1,0 +1,165 @@
+Index: services/app/Dockerfile.production
+===================================================================
+--- services/app/Dockerfile.production	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ services/app/Dockerfile.production	(revision c355cde602f2281c5555e883fb59c829f98b894f)
+@@ -1,10 +0,0 @@
+-# base image
+-FROM node:12.2.0-alpine
+-
+-WORKDIR /app
+-ENV NODE_ENV=production
+-
+-COPY . /app
+-RUN npm install
+-
+-CMD ["npm", "build"]
+\ No newline at end of file
+Index: terraform/do.tf
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>variable \"do_token\" {}\n\n# Configure the DigitalOcean Provider\nprovider \"digitalocean\" {\n  token = \"${var.do_token}\"\n}\n\n\n# Create a web server\nresource \"digitalocean_droplet\" \"web\" {\n  name = \"weather-api\"\n  image  = \"ubuntu-18-04-x64\"\n  region = \"fra1\"\n  size = \"s-1vcpu-1gb\"\n}\n\nresource \"digitalocean_project\" \"weather-project\" {\n  name        = \"weather-wps\"\n  description = \"Project for the weather\"\n  purpose     = \"Class project / Educational purposes\"\n  environment = \"Staging\"\n  resources   = [\"${digitalocean_droplet.web.urn}\"]\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- terraform/do.tf	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ terraform/do.tf	(date 1559798289000)
+@@ -8,14 +8,14 @@
+ 
+ # Create a web server
+ resource "digitalocean_droplet" "web" {
+-  name = "weather-api"
++  name = "simple-weather-app"
+   image  = "ubuntu-18-04-x64"
+   region = "fra1"
+   size = "s-1vcpu-1gb"
+ }
+ 
+ resource "digitalocean_project" "weather-project" {
+-  name        = "weather-wps"
++  name        = "simple-weather-app"
+   description = "Project for the weather"
+   purpose     = "Class project / Educational purposes"
+   environment = "Staging"
+Index: ansible/group_vars/all/vault.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>$ANSIBLE_VAULT;1.1;AES256\n64333634663165383333396562373762666131623162303264626434383761653032326232333831\n3232316465633761363534353731623462643438623732610a386462316465613532363565373738\n33356365633935303365666530616435653737356636666631353761643333363430326331636266\n6133326330333833310a323865643135333238373535643630653363616132353964333331633366\n34376162656137616563346662323733383933623861323162376565613638666338616332633665\n65646662303964623030646364383061336530653830303461613332656661386164346565613232\n66616561383264353336626665633365356661626466376634633065326537376363383166623936\n64373664323433663939663139663731643433373064653765346338363332326261633935376230\n62343034363565623336316666306461343166626437343333343935393636643138613061303730\n66663739663664626538353566303363313633643964323062396433373833643031313030333537\n37643962616163333435303061633464666435663961663830323036373361643664303034356531\n34393461666537666466623635636365356536663463363438383033633035326633643862353431\n64363963643162643964323765343730376561336236363239383830396338653261393433393930\n39316236323035613337306330323634356666333863393231626661663762356662346565363532\n61646461653066623631666631363238636436666164323136343033376165353739303663383930\n35396666666665323732343934363334333166616162373436623736663463656364613962333066\n61313339343736333763616437653937626432356262393432396238653534356133366261376432\n66376233633063646538323230333736316166636533656633336436396539643332306336353932\n62353635613062613738343338623039363964653035643036643735333131356461376235616135\n65613332386165353966333634613736353131613631383862666432666638626538336430623265\n6266\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- ansible/group_vars/all/vault.yml	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ ansible/group_vars/all/vault.yml	(date 1559798465000)
+@@ -1,22 +1,5 @@
+-$ANSIBLE_VAULT;1.1;AES256
+-64333634663165383333396562373762666131623162303264626434383761653032326232333831
+-3232316465633761363534353731623462643438623732610a386462316465613532363565373738
+-33356365633935303365666530616435653737356636666631353761643333363430326331636266
+-6133326330333833310a323865643135333238373535643630653363616132353964333331633366
+-34376162656137616563346662323733383933623861323162376565613638666338616332633665
+-65646662303964623030646364383061336530653830303461613332656661386164346565613232
+-66616561383264353336626665633365356661626466376634633065326537376363383166623936
+-64373664323433663939663139663731643433373064653765346338363332326261633935376230
+-62343034363565623336316666306461343166626437343333343935393636643138613061303730
+-66663739663664626538353566303363313633643964323062396433373833643031313030333537
+-37643962616163333435303061633464666435663961663830323036373361643664303034356531
+-34393461666537666466623635636365356536663463363438383033633035326633643862353431
+-64363963643162643964323765343730376561336236363239383830396338653261393433393930
+-39316236323035613337306330323634356666333863393231626661663762356662346565363532
+-61646461653066623631666631363238636436666164323136343033376165353739303663383930
+-35396666666665323732343934363334333166616162373436623736663463656364613962333066
+-61313339343736333763616437653937626432356262393432396238653534356133366261376432
+-66376233633063646538323230333736316166636533656633336436396539643332306336353932
+-62353635613062613738343338623039363964653035643036643735333131356461376235616135
+-65613332386165353966333634613736353131613631383862666432666638626538336430623265
+-6266
++vault_do_token: "86a9d7617b3b1e27c8befec604886432e5a5e279f81742c8f36b456dc6c0e346"
++
++REACT_APP_WEATHER_APIXU_API_KEY: 17300fab66e043dcace84403191905
++REACT_APP_WEATHER_STORMGLASS_API_KEY: 8595e00a-7a62-11e9-a84f-0242ac130004-8595e1d6-7a62-11e9-a84f-0242ac130004
++REACT_APP_WEATHER_SOPENCAGEDATA_API_KEY: 8fb1bd57bcdd456fb93e0e75acfb33be
+\ No newline at end of file
+Index: docker-compose.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>version: '3.3'\n\nservices:\n  app:\n    env_file: './services/app/.env'\n    container_name: simpleweather\n    build:\n      context: services/app\n      dockerfile: Dockerfile.development\n    expose:\n      - '3000'\n\n  nginx:\n    container_name: simpleweather_nginx\n    build:\n      context: services/nginx\n    ports:\n      - '80:80'\n    depends_on:\n      - app
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- docker-compose.yml	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ docker-compose.yml	(date 1559797155000)
+@@ -6,7 +6,7 @@
+     container_name: simpleweather
+     build:
+       context: services/app
+-      dockerfile: Dockerfile.development
++      dockerfile: Dockerfile
+     expose:
+       - '3000'
+ 
+Index: ansible/production/inventory
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>[production]\n142.93.99.193
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- ansible/production/inventory	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ ansible/production/inventory	(date 1559798374000)
+@@ -1,2 +1,2 @@
+ [production]
+-142.93.99.193
+\ No newline at end of file
++46.101.186.100
+\ No newline at end of file
+Index: services/app/package.json
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>{\n  \"name\": \"antd-demo\",\n  \"version\": \"0.1.0\",\n  \"private\": true,\n  \"dependencies\": {\n    \"@babel/register\": \"^7.0.0\",\n    \"babel-eslint\": \"^10.0.1\",\n    \"babel-plugin-dynamic-import-node\": \"^2.0.0\",\n    \"babel-plugin-import\": \"^1.11.0\",\n    \"babel-plugin-syntax-dynamic-import\": \"^6.18.0\",\n    \"customize-cra\": \"^0.2.11\",\n    \"express\": \"^4.17.1\",\n    \"file-loader\": \"^3.0.1\",\n    \"ignore-styles\": \"^5.0.1\",\n    \"less\": \"^3.9.0\",\n    \"less-loader\": \"^4.1.0\",\n    \"prop-types\": \"^15.7.2\",\n    \"react\": \"^16.8.2\",\n    \"react-dom\": \"^16.8.2\",\n    \"react-scripts\": \"2.1.5\",\n    \"styled-components\": \"^4.2.0\",\n    \"url-loader\": \"^1.1.2\",\n    \"webpack-flush-chunks\": \"^2.0.3\"\n  },\n  \"scripts\": {\n    \"start\": \"react-scripts start\",\n    \"build\": \"SKIP_PREFLIGHT_CHECK=true react-scripts build\",\n    \"server\": \"NODE_ENV=development NODE_PATH=src node src/server/bootstrap.js\"\n  },\n  \"resolutions\": {\n    \"babel-core\": \"7.0.0-bridge.0\"\n  },\n  \"eslintConfig\": {\n    \"extends\": \"react-app\"\n  },\n  \"browserslist\": [\n    \">0.2%\",\n    \"not dead\",\n    \"not ie <= 11\",\n    \"not op_mini all\"\n  ],\n  \"devDependencies\": {\n    \"@babel/plugin-proposal-class-properties\": \"^7.4.4\",\n    \"babel-plugin-styled-components\": \"^1.10.0\",\n    \"eslint\": \"^5.16.0\",\n    \"eslint-config-airbnb\": \"^17.1.0\",\n    \"eslint-config-prettier\": \"^4.3.0\",\n    \"eslint-plugin-import\": \"^2.17.3\",\n    \"eslint-plugin-jsx-a11y\": \"^6.2.1\",\n    \"eslint-plugin-prettier\": \"^3.1.0\",\n    \"eslint-plugin-react\": \"^7.13.0\",\n    \"extract-css-chunks-webpack-plugin\": \"^4.5.2\",\n    \"prettier\": \"^1.17.1\",\n    \"prettier-eslint\": \"^8.8.2\",\n    \"stylelint\": \"^10.0.1\",\n    \"stylelint-config-standard\": \"^18.3.0\"\n  }\n}\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/package.json	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ services/app/package.json	(date 1559801440000)
+@@ -25,7 +25,7 @@
+   "scripts": {
+     "start": "react-scripts start",
+     "build": "SKIP_PREFLIGHT_CHECK=true react-scripts build",
+-    "server": "NODE_ENV=development NODE_PATH=src node src/server/bootstrap.js"
++    "server": "NODE_PATH=src node src/server/bootstrap.js"
+   },
+   "resolutions": {
+     "babel-core": "7.0.0-bridge.0"
+Index: ansible/production/group_vars/all/vault.yml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>$ANSIBLE_VAULT;1.1;AES256\n31653061333333353465326464616437303134613331626566383964313461316530366663316239\n3431613633313131626535613338373630303263353638390a633066363661666563353839303531\n34643537333066303963393864323436383634666663313039626264633539326364383266643361\n6339373631666366320a646164336566346165383330323864386439396461353031343738373263\n33316539336462363838623638343161333863336431353261366437666166303066373339316264\n6335336130613434366134353234663032633465636338353830\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- ansible/production/group_vars/all/vault.yml	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ ansible/production/group_vars/all/vault.yml	(date 1559798703000)
+@@ -1,7 +1,1 @@
+-$ANSIBLE_VAULT;1.1;AES256
+-31653061333333353465326464616437303134613331626566383964313461316530366663316239
+-3431613633313131626535613338373630303263353638390a633066363661666563353839303531
+-34643537333066303963393864323436383634666663313039626264633539326364383266643361
+-6339373631666366320a646164336566346165383330323864386439396461353031343738373263
+-33316539336462363838623638343161333863336431353261366437666166303066373339316264
+-6335336130613434366134353234663032633465636338353830
++vault_ansible_ssh_pass: 19691969
+\ No newline at end of file
+Index: services/app/Dockerfile.development
+===================================================================
+--- services/app/Dockerfile.development	(revision c355cde602f2281c5555e883fb59c829f98b894f)
++++ services/app/Dockerfile	(date 1559796990000)
+@@ -2,7 +2,10 @@
+ FROM node:12.2.0-alpine
+ 
+ WORKDIR /app
++
+ ENV NODE_ENV=development
++ENV SKIP_PREFLIGHT_CHECK=true
++ENV NODE_PATH=src
+ 
+ COPY . /app
+ RUN npm install

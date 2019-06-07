@@ -1,0 +1,229 @@
+Index: services/app/src/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\nimport ReactDOM from 'react-dom';\nimport App from 'common/App';\nimport { BrowserRouter } from 'react-router-dom';\n\n// import * as serviceWorker from 'serviceWorker';\n\nReactDOM.hydrate(\n  <BrowserRouter>\n    <App />\n  </BrowserRouter>,\n  document.getElementById('root')\n);\n\n// serviceWorker.register();\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/index.js	(date 1559826166000)
++++ services/app/src/index.js	(date 1559891390000)
+@@ -1,15 +1,19 @@
+ import React from 'react';
+ import ReactDOM from 'react-dom';
+ import App from 'common/App';
++import Loadable from 'react-loadable';
+ import { BrowserRouter } from 'react-router-dom';
+-
+ // import * as serviceWorker from 'serviceWorker';
+ 
+-ReactDOM.hydrate(
+-  <BrowserRouter>
+-    <App />
+-  </BrowserRouter>,
+-  document.getElementById('root')
+-);
++window.main = () => {
++  Loadable.preloadReady().then(() => {
++    ReactDOM.hydrate(
++      <BrowserRouter>
++        <App />
++      </BrowserRouter>,
++      document.getElementById('root')
++    );
++  });
++};
+ 
+ // serviceWorker.register();
+Index: services/app/src/common/AppRoutes.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\nimport { Switch, Route } from 'react-router-dom';\nimport WeatherComponent from 'common/weather/component';\nimport NotFound from 'common/notFound/component';\n\nconst AppRoutes = () => (\n  <Switch>\n    <Route exact path=\"/\" component={WeatherComponent} />\n    <Route component={NotFound} />\n  </Switch>\n);\n\nexport default AppRoutes;\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/common/AppRoutes.js	(date 1559826166000)
++++ services/app/src/common/AppRoutes.js	(date 1559892202000)
+@@ -1,11 +1,20 @@
+ import React from 'react';
+ import { Switch, Route } from 'react-router-dom';
+-import WeatherComponent from 'common/weather/component';
++// import WeatherComponent from 'common/weather/component';
+ import NotFound from 'common/notFound/component';
++import Loadable from 'react-loadable';
++
++const LoadableWeather = Loadable({
++  loader: () => import(/* webpackChunkName: "WeatherChunk"*/ 'common/weather/component'), // <--
++  // this
++  // will tell webpack to generate named bundles
++  loading: () => null,
++  modules: ['WeatherChunk'], // <-- this is what we'll use to map components to js bundles
++})
+ 
+ const AppRoutes = () => (
+   <Switch>
+-    <Route exact path="/" component={WeatherComponent} />
++    <Route exact path="/" component={LoadableWeather} />
+     <Route component={NotFound} />
+   </Switch>
+ );
+Index: services/app/src/server/bootstrap.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>\nrequire('ignore-styles');\nrequire('url-loader');\nrequire('file-loader');\nrequire('@babel/register')({\n  ignore: [ /(node_modules)/ ],\n  presets: [\n    [\n      \"@babel/preset-env\",\n      {\n        \"targets\": {\n          \"node\": \"10\"\n        }\n      }\n    ],\n    '@babel/preset-react'\n  ],\n  plugins: [\n    'syntax-dynamic-import',\n    'dynamic-import-node',\n    '@babel/plugin-proposal-class-properties',\n    \"babel-plugin-styled-components\"\n  ]\n});\nrequire('./index');
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/server/bootstrap.js	(date 1559826166000)
++++ services/app/src/server/bootstrap.js	(date 1559890010000)
+@@ -22,4 +22,4 @@
+     "babel-plugin-styled-components"
+   ]
+ });
+-require('./index');
+\ No newline at end of file
++require('./index');
+Index: services/app/src/server/index.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import express from 'express';\n\n// we'll talk about this in a minute:\nimport serverRenderer from './middleware/renderer';\n\nconst PORT = 3000;\nconst path = require('path');\n\n// initialize the application and create the routes\nconst app = express();\nconst router = express.Router();\n\n// root (/) should always serve our server rendered page\nrouter.use('^/$', serverRenderer);\n\n// other static resources should just be served as they are\nrouter.use(\n  express.static(path.resolve(__dirname, '..', '..', 'build'), {\n    maxAge: '30d'\n  })\n);\n\n// tell the app to use the above rules\napp.use(router);\n\n// start the app\napp.listen(PORT, error => {\n  if (error) {\n    return console.log('something bad happened', error);\n  }\n\n  console.log('listening on ' + PORT + '...');\n});\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/server/index.js	(date 1559826166000)
++++ services/app/src/server/index.js	(date 1559897301000)
+@@ -1,33 +1,77 @@
+ import express from 'express';
+-
+-// we'll talk about this in a minute:
+-import serverRenderer from './middleware/renderer';
++import path from 'path';
++import React from 'react';
++import ReactDOMServer from 'react-dom/server';
++import Loadable from 'react-loadable';
++import { ServerStyleSheet } from 'styled-components';
++import { StaticRouter } from 'react-router-dom';
++import App from '../common/App';
++import manifest from '../../build/asset-manifest.json';
+ 
+-const PORT = 3000;
+-const path = require('path');
+-
+-// initialize the application and create the routes
+ const app = express();
+-const router = express.Router();
+ 
+-// root (/) should always serve our server rendered page
+-router.use('^/$', serverRenderer);
++const buildDirectoryPath = path.resolve(__dirname, '..', '..', 'build');
+ 
+-// other static resources should just be served as they are
+-router.use(
+-  express.static(path.resolve(__dirname, '..', '..', 'build'), {
+-    maxAge: '30d'
+-  })
+-);
++app.use(express.static('../../build'));
++
++app.get('^/$', (req, res) => {
++  console.log(101);
++  let modules = [];
++  const context = {};
++  const sheet = new ServerStyleSheet();
++  let html = ReactDOMServer.renderToString(
++    sheet.collectStyles(
++      <Loadable.Capture report={moduleName => modules.push(moduleName)}>
++        <StaticRouter location={req.url} context={context}>
++          <App />
++        </StaticRouter>
++      </Loadable.Capture>
++    )
++  );
+ 
+-// tell the app to use the above rules
+-app.use(router);
++  const styles = sheet.getStyleTags();
++
++  const extractAssets = (assetType, manifest, chunks) =>
++    Object.keys(manifest)
++      .filter(c => chunks.indexOf(c.replace(`.${assetType}`, '')) > -1)
++      .map(a => manifest[a]);
+ 
+-// start the app
+-app.listen(PORT, error => {
+-  if (error) {
+-    return console.log('something bad happened', error);
+-  }
++  const scripts = extractAssets('js', manifest, modules);
++  console.log(`${scripts[0]}`);
+ 
+-  console.log('listening on ' + PORT + '...');
++  res.send(`
++    <!doctype html>
++    <html lang="en">
++      <head>
++        <meta charset="UTF-8">
++        <meta name="viewport" content="width=device-width, initial-scale=1.0">
++        <meta http-equiv="X-UA-Compatible" content="ie=edge">
++        <title>My App</title>
++        ${styles}
++      </head>
++      <body>
++        <div id="app">${html}</div>
++        <script src="manifest.js"></script>
++        <script src="main.js"></script> 
++        ${scripts
++          .map(script => {
++            return `<script src="${script}"></script>`;
++          })
++          .join('\n')}
++        <script>window.main();</script>
++      </body>
++    </html>
++  `);
+ });
++
++// app.use('/dist', express.static(path.join(__dirname, 'dist')));
++
++Loadable.preloadAll()
++  .then(() => {
++    app.listen(3000, () => {
++      console.log('Running on http://localhost:3000/');
++    });
++  })
++  .catch(err => {
++    console.log(err);
++  });
+Index: services/app/src/common/App.js
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import React from 'react';\nimport { createGlobalStyle } from 'styled-components'\nimport AppRoutes from 'common/AppRoutes';\n\nconst GlobalStyle = createGlobalStyle`\n  body {\n    margin: 0;\n  }\n`;\n\nfunction App() {\n  return (\n      <div className=\"App\">\n        <GlobalStyle />\n        <AppRoutes />\n      </div>\n  );\n}\n\nexport default App;
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- services/app/src/common/App.js	(date 1559826166000)
++++ services/app/src/common/App.js	(date 1559891513000)
+@@ -1,5 +1,5 @@
+ import React from 'react';
+-import { createGlobalStyle } from 'styled-components'
++import { createGlobalStyle } from 'styled-components';
+ import AppRoutes from 'common/AppRoutes';
+ 
+ const GlobalStyle = createGlobalStyle`
+@@ -10,11 +10,11 @@
+ 
+ function App() {
+   return (
+-      <div className="App">
+-        <GlobalStyle />
+-        <AppRoutes />
+-      </div>
++    <div className="App">
++      <GlobalStyle />
++      <AppRoutes />
++    </div>
+   );
+ }
+ 
+-export default App;
+\ No newline at end of file
++export default App;
