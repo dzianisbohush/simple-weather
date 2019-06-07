@@ -25,7 +25,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "server": "node src/server/bootstrap.js"
+    "server": "node src/server/bootstrap.js",
+    "eject": "react-scripts eject"
   },
   "resolutions": {
     "babel-core": "7.0.0-bridge.0"
