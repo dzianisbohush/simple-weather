@@ -8,9 +8,10 @@ ENV SKIP_PREFLIGHT_CHECK=true
 ENV NODE_PATH=src
 
 COPY . /app
+
 RUN npm install
+RUN npm run clean-dist-folder
+RUN npm run build-client
+RUN npm run build-server
 
-RUN npm run build
-COPY . /app
-
-CMD ["npm", "run", "server"]
+CMD ["npm", "run", "run-server"]
