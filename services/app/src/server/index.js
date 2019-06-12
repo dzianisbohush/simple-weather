@@ -14,7 +14,7 @@ const server = express();
 
 server.use(express.static('dist'));
 
-server.use('*', (req, res) => {
+server.use('/', (req, res) => {
   const modules = new Set();
   const context = {};
   const sheet = new ServerStyleSheet();
