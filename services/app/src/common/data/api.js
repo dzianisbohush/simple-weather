@@ -7,7 +7,7 @@ import {
   WEATHER_STORMGLASS_API_KEY,
   OPENCAGEDATA_BASE_URL,
   OPENCAGEDATA_API_KEY
-} from 'common/data/constants';
+} from './constants';
 
 export const getCoordinatesFromLocationName = async locationName => {
   try {

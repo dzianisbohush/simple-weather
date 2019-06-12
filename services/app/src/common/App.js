@@ -1,6 +1,6 @@
 import React from 'react';
 import { createGlobalStyle } from 'styled-components'
-import AppRoutes from 'common/AppRoutes';
+import AppRoutes from './AppRoutes';
 
 const GlobalStyle = createGlobalStyle`
   body {

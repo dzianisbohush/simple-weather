@@ -1,33 +1,72 @@
 import express from 'express';
+import React from 'react';
+import { renderToString } from 'react-dom/server';
+import Loadable from 'react-loadable';
+import { getBundles } from 'react-loadable-ssr-addon';
+import { StaticRouter } from 'react-router-dom';
+import { ServerStyleSheet } from 'styled-components';
+import App from '../common/App';
 
-// we'll talk about this in a minute:
-import serverRenderer from './middleware/renderer';
+const manifest = require('../../dist/react-loadable-ssr-addon');
 
 const PORT = 3000;
-const path = require('path');
+const server = express();
 
-// initialize the application and create the routes
-const app = express();
-const router = express.Router();
+server.use(express.static('dist'));
 
-// root (/) should always serve our server rendered page
-router.use('^/$', serverRenderer);
+server.use('*', (req, res) => {
+  const modules = new Set();
+  const context = {};
+  const sheet = new ServerStyleSheet();
 
-// other static resources should just be served as they are
-router.use(
-  express.static(path.resolve(__dirname, '..', '..', 'build'), {
-    maxAge: '30d'
-  })
-);
+  const html = renderToString(
+    sheet.collectStyles(
+      <Loadable.Capture report={moduleName => modules.add(moduleName)}>
+        <StaticRouter location={req.url} context={context}>
+          <App />
+        </StaticRouter>
+      </Loadable.Capture>
+    )
+  );
+  const styles = sheet.getStyleTags();
 
-// tell the app to use the above rules
-app.use(router);
+  const bundles = getBundles(manifest, [
+    ...manifest.entrypoints,
+    ...Array.from(modules)
+  ]);
 
-// start the app
-app.listen(PORT, error => {
-  if (error) {
-    return console.log('something bad happened', error);
-  }
+  const scripts = bundles.js || [];
 
-  console.log('listening on ' + PORT + '...');
+  res.send(`
+    <!doctype html>
+    <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+         <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
+        <title>Simple weather app</title>
+        ${styles}
+      </head>
+      <body>
+        <div id="root">${html}</div>
+        ${scripts
+          .map(script => {
+            return `<script src="${script.file}"></script>`;
+          })
+          .join('\n')}
+      </body>
+    </html>
+  `);
 });
+
+Loadable.preloadAll()
+  .then(() => {
+    server.listen(PORT, () => {
+      console.log(`Running on http://localhost:${PORT}/`);
+    });
+  })
+  .catch(err => {
+    console.log(err);
+  });
