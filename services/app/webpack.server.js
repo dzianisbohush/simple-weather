@@ -45,11 +45,25 @@ const config = {
       },
       {
         test: /\.(gif|jpe?g|png|ico)$/,
-        loader: 'url-loader?limit=10000'
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ]
       },
       {
         test: /\.(otf|eot|svg|ttf|woff|woff2).*$/,
-        loader: 'url-loader?limit=10000'
+        use: [
+          {
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+            },
+          },
+        ]
       }
     ]
   },

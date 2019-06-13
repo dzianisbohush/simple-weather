@@ -31,11 +31,12 @@
     "webpack-node-externals": "^1.7.2"
   },
   "scripts": {
-    "start": "npm run clean-dist-folder && npm run build-client && npm run build-server && npm run run-server",
+    "start": "npm run clean-dist-folder && npm run build-client && npm run copy-sw-to-dist-folder && npm run build-server && npm run run-server",
     "build-server": "webpack --config webpack.server.js",
     "run-server": "nodemon --watch build --exec \"node build/bundle.js\"",
     "build-client": "webpack --config webpack.client.js",
     "clean-dist-folder": "rm -rf ./dist/",
+    "copy-sw-to-dist-folder": "cp serviceWorker.js dist",
     "eject": "react-scripts eject"
   },
   "resolutions": {

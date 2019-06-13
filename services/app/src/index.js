@@ -4,7 +4,7 @@ import Loadable from 'react-loadable';
 import { BrowserRouter } from 'react-router-dom';
 import App from './common/App';
 
-// import * as serviceWorker from 'serviceWorker';
+// import * as serviceWorker from './serviceWorker';
 
 window.onload = () => {
   Loadable.preloadReady().then(() => {

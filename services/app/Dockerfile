@@ -12,6 +12,7 @@ COPY . /app
 RUN npm install
 RUN npm run clean-dist-folder
 RUN npm run build-client
+RUN npm run copy-sw-to-dist-folder
 RUN npm run build-server
 
 CMD ["npm", "run", "run-server"]
