@@ -1,5 +1,5 @@
 
-###### Simple example of app with server-side rendering and code splitting.
+## Simple example of app with server-side rendering and code splitting.
 
 For starting locally:
 ```bash
